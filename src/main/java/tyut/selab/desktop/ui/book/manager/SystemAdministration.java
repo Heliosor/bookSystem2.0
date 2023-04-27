@@ -3,17 +3,20 @@ import tyut.selab.desktop.moudle.book.bookcontroller.impl.BookBorrowController;
 import tyut.selab.desktop.moudle.book.bookcontroller.impl.BookMessageController;
 import tyut.selab.desktop.moudle.book.domain.Book;
 import tyut.selab.desktop.moudle.book.domain.vo.BookVo;
-import tyut.selab.desktop.moudle.student.domain.vo.UserVo;
 import tyut.selab.desktop.moudle.student.usercontroller.impl.UserController;
+import tyut.selab.desktop.ui.book.manager.dialog.MyDialogInsert;
+import tyut.selab.desktop.ui.book.manager.dialog.MyJDialogBlackList;
+import tyut.selab.desktop.ui.book.manager.dialog.MyJDialogDelete;
+import tyut.selab.desktop.ui.book.manager.dialog.UpdateJMoudle.MyJDialogUpdate;
+
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -47,9 +50,10 @@ public class SystemAdministration extends JPanel {
         setLayout(null);
 
         // 建两个panel 一个固定菜单按钮不进行刷新 一个面板用于展示刷新
+        // 建两个panel 一个固定菜单按钮不进行刷新 一个面板用于展示刷新
         // 用于刷新变更的面板 放jtable
         JPanel viewJPanel = new JPanel();
-        viewJPanel.setBounds(250, 130, 1010, 600);
+        viewJPanel.setBounds(0, 150, 1010, 550);
         viewJPanel.setBackground(Color.cyan);
 
 
@@ -62,6 +66,11 @@ public class SystemAdministration extends JPanel {
         };
         jt = new JTable(defaultTableModel);
         jt.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JTableHeader tableHeader = jt.getTableHeader();
+        jt.setFont(new Font("楷书",Font.PLAIN,15));
+        jt.setRowHeight(35);
+        tableHeader.setFont(new Font("楷书",Font.PLAIN,20));
+        tableHeader.setReorderingAllowed(false);
         TableColumn column = null;
         //设置列宽
         int colunms = jt.getColumnCount();
@@ -79,15 +88,15 @@ public class SystemAdministration extends JPanel {
                 return new Dimension(750, 450);
             }
         };
-        js.setBounds(0,0,1010,600);
-        viewJPanel.setBounds(250, 130, 1010, 600);
+        js.setBounds(0,0,1010,550);
+        viewJPanel.setLayout(null);
         viewJPanel.add(js);
         viewJPanel.setVisible(true);
         add(viewJPanel);
 
         // 菜单面板
         JPanel menuJPanel = new JPanel();
-        menuJPanel.setBounds(250, 30, 1010, 100);
+        menuJPanel.setBounds(0, 0, 1010, 150);
         menuJPanel.setVisible(true);
         menuJPanel.setBackground(Color.PINK);
         menuJPanel.setLayout(null);
@@ -99,14 +108,14 @@ public class SystemAdministration extends JPanel {
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-               MyDialogInsert myDialogInsert = new MyDialogInsert();
+               MyDialogInsert myDialogInsert = new MyDialogInsert(dataV,titlesV,defaultTableModel,jt);
                 myDialogInsert.setVisible(true);
             }
         });
-        addButton.setFont(new Font("微软雅黑", Font.BOLD, 15));
+        addButton.setFont(new Font("微软雅黑", Font.BOLD, 18));
         addButton.setBackground(new Color(0xFFFF4E4E, true));
         addButton.setForeground(Color.white);
-        addButton.setBounds(160, 10, 150, 40);
+        addButton.setBounds(100, 20, 180, 60  );
         addButton.setFocusPainted(false);                         // 按钮字周围的小光圈
         menuJPanel.add(addButton);
 
@@ -117,14 +126,14 @@ public class SystemAdministration extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int updateSelectedRow = jt.getSelectedRow();
-                MyJDialogUpdate myJDialog = new MyJDialogUpdate(updateSelectedRow);
-                myJDialog.setVisible(true);
+                MyJDialogUpdate myJDialog = new MyJDialogUpdate(updateSelectedRow,dataV,titlesV,jt,defaultTableModel);
+                 myJDialog.setVisible(true);
             }
         });
-        changeButton.setFont(new Font("微软雅黑", Font.BOLD, 15));            //根据主界面写的
+        changeButton.setFont(new Font("微软雅黑", Font.BOLD, 18));            //根据主界面写的
         changeButton.setBackground(new Color(0xFFFF4E4E, true));
         changeButton.setForeground(Color.white);
-        changeButton.setBounds(340, 10, 150, 40);
+        changeButton.setBounds(310, 20, 180,60);
         changeButton.setFocusPainted(false);                              // ？
         menuJPanel.add(changeButton);
 
@@ -134,14 +143,14 @@ public class SystemAdministration extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = jt.getSelectedRow();
-                MyJDialogDelete myJDialogDelete = new MyJDialogDelete(selectedRow);
+                MyJDialogDelete myJDialogDelete = new MyJDialogDelete(selectedRow,dataV,titlesV,jt,defaultTableModel);
                 myJDialogDelete.setVisible(true);
             }
         });
-        deleteButton.setFont(new Font("微软雅黑", Font.BOLD, 15));              //根据主界面写的
+        deleteButton.setFont(new Font("微软雅黑", Font.BOLD, 18));              //根据主界面写的
         deleteButton.setBackground(new Color(0xFFFF4E4E, true));
         deleteButton.setForeground(Color.white);
-        deleteButton.setBounds(520, 10, 150, 40);
+        deleteButton.setBounds(520, 20, 180, 60);
         deleteButton.setFocusPainted(false);
         menuJPanel.add(deleteButton);
 
@@ -173,80 +182,87 @@ public class SystemAdministration extends JPanel {
         blacklistButton.setFont(new Font("微软雅黑", Font.BOLD, 15));          //根据主界面写的
         blacklistButton.setBackground(new Color(0xFFFF4E4E, true));
         blacklistButton.setForeground(Color.white);
-        blacklistButton.setBounds(700, 10, 150, 40);
+        blacklistButton.setBounds(730, 20, 180, 60);
         blacklistButton.setFocusPainted(false);
         menuJPanel.add(blacklistButton);
 
         //下拉选择
         JComboBox<String> jComboBox = new JComboBox<String>();
+        jComboBox.addItem("-查看全部书籍-");
         jComboBox.addItem("-按价格升序排列-");
         jComboBox.addItem("-按价格降序排列-");
         jComboBox.addItem("-查看未借出书籍-");
         jComboBox.addItem("-查看未归还书籍-");
-        jComboBox.addItem("-查看全部书籍-");
-        jComboBox.setBounds(20,60,120,30);
+        jComboBox.setSelectedItem("-查看全部书籍-");
+        jComboBox.setBounds(50,100,170,40);
         jComboBox.setBackground(Color.PINK);
         jComboBox.setForeground(Color.black);
-        jComboBox.setFont( new Font("微软雅黑", Font.BOLD, 10));
-        String chooseItem = jComboBox.getSelectedItem().toString();
+        jComboBox.setFont( new Font("微软雅黑", Font.BOLD, 18));
         List<BookVo> bookVos = bookMessageController.queryAllBook();
-        List<BookVo> bookVos1 = null;
-        switch(chooseItem){
-            case "-按价格升序排列-":
-                bookVos1 = sortBookVos(bookVos, BOOK_PRICE_ASC);
-                break;
-            case "-按价格降序排列-":
-                bookVos1 = sortBookVos(bookVos,BOOK_PRICE_DESC);
-                break;
-            case "-查看未借出书籍-":
-                for (int i = 0; i < bookVos.size(); i++) {
-                     if(bookVos.get(i).getBookStatus() == Book.LENDABLE){
-                         bookVos1.add(bookVos.get(i));
-                     }
-                }
-                break;
-            case "-查看未归还书籍-":
-                bookVos1 = bookMessageController.queryBorrowBookLog();
-                break;
-            case "-查看全部书籍-":
-                bookVos1 = bookVos;
-                break;
-            default:
-                break;
-        }
-           dataV = getDataVector(bookVos1);
-        defaultTableModel.setDataVector(dataV,titlesV);
-        menuJPanel.add(jComboBox);
+        dataV = getDataVector(bookVos);
+        jComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
 
+                String chooseItem = (String) jComboBox.getSelectedItem();
+                List<BookVo> bookVos1 = null;
+                switch(chooseItem){
+                    case "-按价格升序排列-":
+                        bookVos1 = sortBookVos(bookVos, BOOK_PRICE_ASC);
+                        break;
+                    case "-按价格降序排列-":
+                        bookVos1 = sortBookVos(bookVos,BOOK_PRICE_DESC);
+                        break;
+                    case "-查看未借出书籍-":
+                        bookVos1 = sortBookVos(bookVos,BOOK_LENDABLE);
+                        break;
+                    case "-查看未归还书籍-":
+                        bookVos1=sortBookVos(bookVos,BOOK_LENDED);
+                        break;
+                    case "-查看全部书籍-":
+                        bookVos1 = bookVos;
+                        break;
+                    default:
+                        break;
+                }
+
+                defaultTableModel.setDataVector(dataV, titlesV);
+            }
+        });
+        menuJPanel.add(jComboBox);
         //文字标签1
         JLabel jlName = new JLabel("书籍名称:",JLabel.CENTER);
-        jlName.setFont( new Font("微软雅黑", Font.BOLD, 13) );
-        jlName.setBounds(160,60,60,30);
+        jlName.setFont( new Font("微软雅黑", Font.BOLD, 18) );
+        jlName.setBounds(250,100,80,40);
         jlName.setForeground(Color.WHITE);
         menuJPanel.add(jlName);
 
         //文本框1
         JTextField jtName = new JTextField();
-        jtName.setBounds(230,60,250,30);
+        jtName.setBounds(350,100,200,40);
+        jtName.setFont(new Font("微软雅黑", Font.PLAIN, 18) );
+        jtName.setHorizontalAlignment(JTextField.CENTER);
         menuJPanel.add(jtName);
 
         //文字标签2
         JLabel jlStudentId = new JLabel("学生学号:",JLabel.CENTER);
-        jlStudentId.setFont( new Font("微软雅黑", Font.BOLD, 13) );
+        jlStudentId.setFont( new Font("微软雅黑", Font.BOLD, 18) );
         jlStudentId.setForeground(Color.WHITE);
-        jlStudentId.setBounds(500,60,60,30);
+        jlStudentId.setBounds(580,100,80,40);
         menuJPanel.add(jlStudentId);
 
         //文本框2
         JTextField jtStudentId = new JTextField();
-        jtStudentId.setBounds(570,60,250,30);
+        jtStudentId.setBounds(680,100,200,40);
+        jtStudentId.setFont(new Font("微软雅黑", Font.PLAIN, 18) );
+        jtStudentId.setHorizontalAlignment(JTextField.CENTER);
         menuJPanel.add(jtStudentId);
 
         // 查询书籍
         // 之后要插入图片
         JButton searchButton = new JButton();
-        searchButton.setBounds(855,60,30, 30);
-        ImageIcon icon = new ImageIcon(System.getProperty("user.dir") + "C:\\Users\\26580\\Desktop\\desket_platfrom-main\\ui_text\\R-C.png");
+        searchButton.setBounds(920,100,40, 40);
+        ImageIcon icon = new ImageIcon("src/main/java/tyut/selab/desktop/ui/book/R-C (1).png");
         searchButton.setIcon(icon);
         searchButton.setOpaque(false);                       //设置控件是否透明，true为不透明，false为透明
         searchButton.setContentAreaFilled(false);               //设置图片填满按钮所在的区域
@@ -258,11 +274,11 @@ public class SystemAdministration extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 String textName = jtName.getText();
                 String textStudentId = jtStudentId.getText();
-                if (textName != "") {
-                    if (textStudentId != "") {
+                if (!textName.equals("")) {
+                    if (!textStudentId.equals("")) {
                         BookVo bookVo = null;
                         try {
-                            bookVo = bookMessageController.queryBorrowBookLog(textName, Integer.valueOf(textStudentId));
+                            bookVo = bookMessageController.queryBookLog(Integer.valueOf(textStudentId),textName);
                         } catch (SQLException ex) {
                             throw new RuntimeException(ex);
                         } catch (NoSuchFieldException ex) {
@@ -275,13 +291,15 @@ public class SystemAdministration extends JPanel {
                             throw new RuntimeException(ex);
                         }
                         List<BookVo> bookVos = new ArrayList<>();
-                        bookVos.add(bookVo);
+                        if(bookVo != null){
+                            bookVos.add(bookVo);
+                        }
                         dataV = getDataVector(bookVos);
                         defaultTableModel.setDataVector(dataV, titlesV);
                     } else {
                         List<BookVo> bookVos = null;
                         try {
-                            bookVos = bookMessageController.queryBorrowBookLog(textName);
+                            bookVos = bookMessageController.queryBookByBookName(textName);
                         } catch (SQLException ex) {
                             throw new RuntimeException(ex);
                         } catch (NoSuchFieldException ex) {
@@ -297,10 +315,12 @@ public class SystemAdministration extends JPanel {
                         defaultTableModel.setDataVector(dataV, titlesV);
                     }
                 } else {
-                    if (textStudentId != "") {
+                    if (!textStudentId.equals("")) {
                         List<BookVo> bookVos = null;
                         try {
-                            bookVos = bookMessageController.queryBorrowBookLog(textStudentId);
+                            System.out.println(textStudentId);
+                            bookVos = bookMessageController.queryBookByUserid(Integer.valueOf(textStudentId));
+
                         } catch (SQLException ex) {
                             throw new RuntimeException(ex);
                         } catch (NoSuchFieldException ex) {
@@ -337,424 +357,6 @@ public class SystemAdministration extends JPanel {
         });
         }
 
-
-
-    //    点击黑名单时弹出页面
-    private class MyJDialogBlackList extends JDialog {
-        Vector<String> titleBlackList = null;
-        Vector<Vector> valuesList = null;
-
-        public MyJDialogBlackList(Vector<String> titleBlackList, Vector<Vector> valuesList) {
-            this.titleBlackList = titleBlackList;
-            this.valuesList = valuesList;
-            setTitle("黑名单列表");
-            setModal(true);
-            setSize(800, 500);
-            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            setLocationRelativeTo(null);
-            DefaultTableModel defaultTableModel1 = new DefaultTableModel(valuesList,titleBlackList);
-            JTable jTable = new JTable(defaultTableModel1);
-            JScrollPane jScrollPane = new JScrollPane(jTable);
-            add(jScrollPane);
-
-        }
-    }
-
-    //   删除书籍时弹出的对话框
-        //TODO:   样式
-
-        private class MyJDialogDelete extends JDialog {
-
-            public MyJDialogDelete(int updateSelectColmn) {
-                setTitle("删除书籍");
-                setModal(true);
-                setSize(800, 500);
-                setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                setLocationRelativeTo(null);
-                JLabel jlName = new JLabel("书籍名称");
-                jlName.setFont(new Font("微软黑体",Font.BOLD,15));
-                jlName.setBounds(220,25,100,30);
-                JLabel jlNameContent = new JLabel((String) dataV.get(updateSelectColmn).get(0));
-                jlNameContent.setFont(new Font("微软黑体",Font.PLAIN,15));
-                jlNameContent.setBounds(330,25,300,30);
-                JLabel jlOwner = new JLabel("书籍拥有者");
-                jlOwner.setFont(new Font("微软黑体",Font.BOLD,15));
-                jlOwner.setBounds(220,65,100,30);
-                JLabel jlOwnerConter = new JLabel((String) dataV.get(updateSelectColmn).get(1));
-                jlOwnerConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-                jlOwnerConter.setBounds(330,65,300,30);
-                JLabel jlOwnerStudentId = new JLabel("拥有者学号");
-                jlOwnerStudentId.setFont(new Font("微软黑体",Font.BOLD,15));
-                jlOwnerStudentId.setBounds(220,105,100,30);
-                JLabel jlOwnerStudentIdConter = new JLabel(dataV.get(updateSelectColmn).get(2).toString());
-                jlOwnerStudentIdConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-                jlOwnerStudentIdConter.setBounds(330,105,300,30);
-                JLabel jlPrice = new JLabel("书籍价格");
-                jlPrice.setFont(new Font("微软黑体",Font.BOLD,15));
-                jlPrice.setBounds(220,155,100,30);
-                JLabel jlPriceConter = new JLabel(dataV.get(updateSelectColmn).get(3).toString());
-                jlPriceConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-                jlPriceConter.setBounds(330,155,300,30);
-                jlPriceConter.setSize(100, 30);
-                JLabel jlStatus = new JLabel("书籍状态");
-                jlStatus.setFont(new Font("微软黑体",Font.BOLD,15));
-                jlStatus.setBounds(220,195,100,30);
-                JLabel jlStatusConter = new JLabel(dataV.get(updateSelectColmn).get(5).toString());
-                jlStatusConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-                jlStatusConter.setBounds(330,195,300,30);
-                JLabel jlBorrower = new JLabel("借阅人");
-                jlBorrower.setFont(new Font("微软黑体",Font.BOLD,15));
-                jlBorrower.setBounds(220,235,100,30);
-                JLabel jlBorrowerConter = new JLabel((String) dataV.get(updateSelectColmn).get(4));
-                jlBorrowerConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-                jlBorrowerConter.setBounds(330,235,300,30);
-                JLabel jlBorrowTime = new JLabel("借出时间");
-                jlBorrowTime.setFont(new Font("微软黑体",Font.BOLD,15));
-                jlBorrowTime.setBounds(220,275,100,30);
-                JLabel jlBorrowTimeConter = new JLabel(dataV.get(updateSelectColmn).get(6).toString());
-                jlBorrowTimeConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-                jlBorrowTimeConter.setBounds(330,275,300,30);
-                JLabel jlReturnTime = new JLabel("还书时间");
-                jlReturnTime.setFont(new Font("微软黑体",Font.BOLD,15));
-                jlReturnTime.setBounds(220,315,100,30);
-                JLabel jlReturnTimeConter = new JLabel(dataV.get(updateSelectColmn).get(7).toString());
-                jlReturnTimeConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-                jlReturnTimeConter.setBounds(330,315,300,30);
-                JPanel jp = new JPanel();
-                jp.setSize(800,500);
-                jp.setBackground(Color.WHITE);
-                jp.setLayout(null);
-                JButton jb = new JButton("确认删除");
-                jb.setFont(new Font("微软黑体",Font.BOLD,15));
-                jb.setBounds(250,380,300,40);
-                jb.setBackground(Color.PINK);
-                jb.setForeground(Color.WHITE);
-                jb.setFocusPainted(false);
-                jp.add(jlName);
-                jp.add(jlNameContent);
-                jp.add(jlOwner);
-                jp.add(jlOwnerConter);
-                jp.add(jlOwnerStudentId);
-                jp.add(jlOwnerStudentIdConter);
-                jp.add(jlPrice);
-                jp.add(jlPriceConter);
-                jp.add(jlStatus);
-                jp.add(jlStatusConter);
-                jp.add(jlBorrower);
-                jp.add(jlBorrowerConter);
-                jp.add(jlBorrowTime);
-                jp.add(jlBorrowTimeConter);
-                jp.add(jlReturnTime);
-                jp.add(jlReturnTimeConter);
-                jb.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        int confirmDialog = JOptionPane.showConfirmDialog(null, "请确定是否删除此书籍", "确认删除", JOptionPane.YES_NO_OPTION);
-                        if(confirmDialog == JOptionPane.YES_OPTION){
-                            int selectedRow = jt.getSelectedRow();
-                            dataV.remove(selectedRow);
-                            defaultTableModel.setDataVector(dataV,titlesV);
-                            try {
-                                int flag = bookMessageController.deleteBook(Integer.valueOf(jlOwnerStudentIdConter.getText()), jlNameContent.getText());
-                            } catch (SQLException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                            setVisible(false);
-                        }else{
-                            setVisible(false);
-                        }
-
-                    }
-                });
-                jp.add(jb);
-                add(jp);
-            }
-        }
-
-        //增加书籍的弹出对话框
-        private class MyDialogInsert extends JDialog {
-            public MyDialogInsert() {
-                ImageIcon imageIcon = new ImageIcon(System.getProperty("user.dir") + "\\src\\ManagerGui\\ddot.png");
-                setIconImage(imageIcon.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT));
-
-                setTitle("增加书籍");
-                setModal(true);
-                setSize(800, 500);
-                setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                setLocationRelativeTo(null);
-                JLabel jlName = new JLabel("书籍名称:",JLabel.CENTER);
-                jlName.setFont(new Font("微软黑体",Font.BOLD,20));
-                jlName.setBounds(50,10,200,80);
-                JTextField jlNameContent = new JTextField();
-                jlNameContent.setBounds(260,10,400,80);
-                jlNameContent.setFont(new Font("微软黑体",Font.PLAIN,20));
-                jlNameContent.setHorizontalAlignment(JTextField.CENTER);
-                JLabel jlOwner = new JLabel("书籍拥有者:",JLabel.CENTER);
-                jlOwner.setFont(new Font("微软黑体",Font.BOLD,20));
-                jlOwner.setBounds(50,100,200,80);
-                JTextField jlOwnerConter = new JTextField();
-                jlOwnerConter.setBounds(260,100,400,80);
-                jlOwnerConter.setFont(new Font("微软黑体",Font.PLAIN,20));
-                jlOwnerConter.setHorizontalAlignment(JTextField.CENTER);
-
-                JLabel jlOwnerStudnetId = new JLabel("拥有者学号:",JLabel.CENTER);
-                jlOwnerStudnetId.setFont(new Font("微软黑体",Font.BOLD,20));
-                jlOwnerStudnetId.setBounds(50,190,200,80);
-                JTextField jlOwnerStudentIdConter = new JTextField();
-                jlOwnerStudentIdConter.setBounds(260,190,400,80);
-                jlOwnerStudentIdConter.setFont(new Font("微软黑体",Font.PLAIN,20));
-                jlOwnerStudentIdConter.setHorizontalAlignment(JTextField.CENTER);
-
-                JLabel jlPrice = new JLabel("书籍价格:",JLabel.CENTER);
-                jlPrice.setFont(new Font("微软黑体",Font.BOLD,20));
-                jlPrice.setBounds(50,280,200,80);
-                JTextField jlPriceConter = new JTextField();
-                jlPriceConter.setBounds(260,280,400,80);
-                jlPriceConter.setFont(new Font("微软黑体",Font.PLAIN,20));
-                jlPriceConter.setHorizontalAlignment(JTextField.CENTER);
-
-                JButton jb = new JButton("确定添加");
-                jb.setBounds(150,380,500,60);
-                jb.setFont(new Font("微软雅黑", Font.BOLD, 15));
-                jb.setBackground(Color.PINK);
-                jb.setForeground(Color.WHITE);
-                jb.setFocusPainted(false);
-                JPanel jp = new JPanel();
-                jp.setBounds(0,0,800,500);
-                jp.setBackground(Color.WHITE);
-                jp.setLayout(null);
-                add(jp);
-                jp.add(jlName);
-                jp.add(jlNameContent);
-                jp.add(jlOwner);
-                jp.add(jlOwnerConter);
-                jp.add(jlOwnerStudnetId);
-                jp.add(jlOwnerStudentIdConter);
-                jp.add(jlPrice);
-                jp.add(jlPriceConter);
-                jp.add(jb);
-                jb.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        if (jlNameContent.getText().trim().equals("") || jlOwnerStudentIdConter.getText().trim().equals("") || jlOwnerConter.getText().trim().equals("") || jlPriceConter.getText().trim().equals("")) {
-                            JOptionPane jOptionPane = new JOptionPane();
-                            JOptionPane.showMessageDialog(null, "书籍信息不能为空", "警告框", JOptionPane.WARNING_MESSAGE);
-                        } else {
-                            Vector vector = new Vector();
-                            vector.add(jlNameContent.getText().trim());
-                            vector.add(jlOwnerConter.getText().trim());
-                            vector.add(jlOwnerStudentIdConter.getText().trim());
-                            vector.add(jlPrice.getText().trim());
-                            vector.add("未借出");
-                            vector.add("");
-                            vector.add("");
-                            vector.add("");
-                            dataV.add(vector);
-                            BookVo bookVo = new BookVo();
-                            bookVo.setBookName(jlNameContent.getText());
-                            bookVo.setBookPrice(Double.valueOf(jlPriceConter.getText()));
-                            UserVo userVo = userController.queryUserByStudentNumber(Integer.valueOf(jlOwnerStudentIdConter.getText()));
-                            bookVo.setBookUserVo(userVo);
-                            bookVo.setBookStatus(Book.LENDABLE);
-                            try {
-                                System.out.println(bookMessageController + "=======");
-                                bookMessageController.insertBook(bookVo);
-                            } catch (SQLException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                            defaultTableModel.setDataVector(dataV, titlesV);
-                            setVisible(false);
-                        }
-                    }
-                });
-            }
-        }
-
-        //  修改书籍信息是弹出的对话框
-
-        private class MyJDialogUpdate extends JDialog {
-            public MyJDialogUpdate(int updateSelectColmn) {
-                ImageIcon imageIcon = new ImageIcon(System.getProperty("user.dir") + "\\src\\ManagerGui\\ddot.png");
-                setIconImage(imageIcon.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT));
-                setTitle("修改书籍信息");
-                setModal(true);
-                setSize(800, 500);
-                setDefaultCloseOperation(DISPOSE_ON_CLOSE);    // 关闭后销毁对话框
-                setLocationRelativeTo(null);
-                JLabel jlName = new JLabel("书籍名称:",JLabel.CENTER);
-                jlName.setBounds(190,25,100,30);
-                jlName.setFont(new Font("微软黑体",Font.BOLD,15));
-                JLabel jlNameContent = new JLabel((String) dataV.get(updateSelectColmn).get(0),JLabel.CENTER);
-                jlNameContent.setBounds(300,25,300,30);
-                jlNameContent.setFont(new Font("微软黑体",Font.PLAIN,15));
-
-                JLabel jlOwner = new JLabel("书籍拥有者:",JLabel.CENTER);
-                jlOwner.setBounds(190,65,100,30);
-                jlOwner.setFont((new Font("微软黑体",Font.BOLD,15)));
-                JLabel jlOwnerConter = new JLabel((String) dataV.get(updateSelectColmn).get(1),JLabel.CENTER);
-                jlOwnerConter.setBounds(300,65,300,30);
-                jlOwnerConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-
-                JLabel jlOwnerStudentid = new JLabel("拥有者学号:",JLabel.CENTER);
-                jlOwnerStudentid.setBounds(190,105,100,30);
-                jlOwnerStudentid.setFont(new Font("微软黑体",Font.BOLD,15));
-                JLabel jlOwnerStudentIdConter = new JLabel( dataV.get(updateSelectColmn).get(2).toString(),JLabel.CENTER);
-                jlOwnerStudentIdConter.setBounds(300,105,300,30);
-                jlOwnerStudentIdConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-
-                JLabel jlPrice = new JLabel("书籍价格:",JLabel.CENTER);
-                jlPrice.setBounds(190,155,100,30);
-                jlPrice.setFont(new Font("微软黑体",Font.BOLD,15));
-                JTextField jlPriceConter = new JTextField( dataV.get(updateSelectColmn).get(3).toString());
-                jlPriceConter.setHorizontalAlignment(JTextField.CENTER);
-                jlPriceConter.setBounds(300,155,300,30);
-                jlPriceConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-
-                JLabel jlStatus = new JLabel("书籍状态:",JLabel.CENTER);
-                jlStatus.setBounds(190,195,100,30);
-                jlStatus.setFont(new Font("微软黑体",Font.BOLD,15));
-                JComboBox jComboBox =new JComboBox<>();
-                jComboBox.addItem("                               "+dataV.get(updateSelectColmn).get(4).toString());
-                if(dataV.get(updateSelectColmn).equals(Book.LENDABLE)){
-                    jComboBox.addItem("                               "+"未借出");
-                }else{
-                    jComboBox.addItem("                               "+"已借出");      //9个tab-2空格
-                }
-                jComboBox.setBounds(300,195,300,30);
-                jComboBox.setFont(new Font("微软黑体",Font.PLAIN,15));
-
-                JLabel jlBorrower = new JLabel("借阅人:",JLabel.CENTER);
-                jlBorrower.setBounds(190,235,100,30);
-                jlBorrower.setFont(new Font("微软黑体",Font.BOLD,15));
-                JTextField jlBorrowerConter = new JTextField((String) dataV.get(updateSelectColmn).get(5));
-                jlBorrowerConter.setHorizontalAlignment(JTextField.CENTER);
-                jlBorrowerConter.setBounds(300,235,300,30);
-                jlBorrowerConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-
-                JLabel jlBorrowerStudentId = new JLabel("借阅者学号:",JLabel.CENTER);
-                jlBorrowerStudentId.setBounds(190,235,100,30);
-                jlBorrowerStudentId.setFont(new Font("微软黑体",Font.BOLD,15));
-                JTextField jlBorrowerStudentIdConter = new JTextField((String) dataV.get(updateSelectColmn).get(5));
-                jlBorrowerStudentIdConter.setHorizontalAlignment(JTextField.CENTER);
-                jlBorrowerStudentIdConter.setBounds(300,235,300,30);
-                jlBorrowerStudentIdConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-
-                JLabel jlBorrowTime = new JLabel("借出时间:",JLabel.CENTER);
-                jlBorrowTime.setBounds(190,275,100,30);
-                jlBorrowTime.setFont(new Font("微软黑体",Font.BOLD,15));
-                JLabel jlBorrowTimeConter = new JLabel(dataV.get(updateSelectColmn).get(6).toString(),JLabel.CENTER);
-                jlBorrowTimeConter.setBounds(300,275,300,30);
-                jlBorrowTimeConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-
-                JLabel jlReturnTime = new JLabel("还书时间:",JLabel.CENTER);
-                jlReturnTime.setBounds(190,315,100,30);
-                jlReturnTime.setFont(new Font("微软黑体",Font.BOLD,15));
-                JTextField jlReturnTimeConter = new JTextField(dataV.get(updateSelectColmn).get(7).toString()+"(请使用yyyy-MM-dd HH:mm:ss 格式)");
-                jlReturnTimeConter.setHorizontalAlignment(JTextField.CENTER);
-                jlReturnTimeConter.setBounds(300,315,300,30);
-                jlReturnTimeConter.setFont(new Font("微软黑体",Font.PLAIN,15));
-                JButton jb = new JButton("确认修改");
-                jb.setFont(new Font("微软黑体",Font.BOLD,15));
-                jb.setBounds(250,380,300,40);
-                jb.setBackground(Color.PINK);
-                jb.setForeground(Color.WHITE);
-                jb.setFocusPainted(false);
-
-                JPanel jp = new JPanel();
-                jp.setBounds(0,0,800,500);
-                jp.setBackground(Color.WHITE);
-                jp.setLayout(null);
-                add(jp);
-                jp.add(jb);
-                jp.add(jlName);
-                jp.add(jlNameContent);
-                jp.add(jlOwner);
-                jp.add(jlOwnerConter);
-                jp.add(jlOwnerStudentid);
-                jp.add(jlOwnerStudentIdConter);
-                jp.add(jlPrice);
-                jp.add(jlPriceConter);
-                jp.add(jlStatus);
-                jp.add(jComboBox);
-                jp.add(jlBorrower);
-                jp.add(jlBorrowerConter);
-                jp.add(jlBorrowTime);
-                jp.add(jlBorrowTimeConter);
-                jp.add(jlReturnTime);
-                jp.add(jlReturnTimeConter);
-
-                jb.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        if (jlOwnerStudentIdConter.getText().trim().equals("") || jlOwnerConter.getText().trim().equals("") || jlPriceConter.getText().trim().equals("")) {
-                            JOptionPane.showMessageDialog(null, "书籍信息不能为空", "警告框", JOptionPane.WARNING_MESSAGE);
-                        } else {
-                            if (jComboBox.getSelectedItem().toString().trim().equals("已借出") && (jlBorrowerConter.getText().trim().equals("") || jlReturnTimeConter.getText().trim().equals(""))) {
-                                JOptionPane.showMessageDialog(null, "请输入借阅者信息或归还时间", "输入错误", JOptionPane.WARNING_MESSAGE);
-                            } else {
-
-                                int confirmDialog = JOptionPane.showConfirmDialog(null, "请确定是否修改此书籍", "确认修改", JOptionPane.YES_NO_OPTION);
-                                if (confirmDialog == JOptionPane.YES_OPTION) {
-                                    int selectedRow = jt.getSelectedRow();
-                                    String bookName = dataV.get(selectedRow).get(0).toString();
-                                    Object studentId = dataV.get(selectedRow).get(2);
-                                    dataV.get(selectedRow).set(3, jlPriceConter.getText().trim());
-                                    dataV.get(selectedRow).set(4, jComboBox.getSelectedItem().toString().trim());
-                                    if (jComboBox.getSelectedItem().toString().trim().equals("已借出")) {
-                                        dataV.get(selectedRow).set(5, jlBorrowTimeConter.getText().trim());
-                                        dataV.get(selectedRow).set(7, jlReturnTimeConter.getText().trim());
-                                    } else {
-                                        dataV.get(selectedRow).set(5, "");
-                                        dataV.get(selectedRow).set(7, "");
-                                    }
-                                    BookVo bookVo = null;
-                                    try {
-                                        bookVo = bookMessageController.queryBorrowBookLog(bookName, Integer.valueOf(studentId.toString()));
-                                    } catch (SQLException ex) {
-                                        throw new RuntimeException(ex);
-                                    } catch (NoSuchFieldException ex) {
-                                        throw new RuntimeException(ex);
-                                    } catch (ClassNotFoundException ex) {
-                                        throw new RuntimeException(ex);
-                                    } catch (InstantiationException ex) {
-                                        throw new RuntimeException(ex);
-                                    } catch (IllegalAccessException ex) {
-                                        throw new RuntimeException(ex);
-                                    }
-                                    UserVo userVo = userController.queryUserByStudentNumber((Integer) studentId);
-                                    bookVo.setBookUserVo(userVo);
-                                    bookVo.setBookStatus(jComboBox.getSelectedItem().toString().trim().equals("已借出") ? Book.LENDED : Book.LENDABLE);
-                                    bookVo.setBookPrice(Double.valueOf(jlPriceConter.getText()));
-                                    if (bookVo.getBookStatus() == Book.LENDED) {
-                                        UserVo userVo1 = userController.queryUserByStudentNumber(Integer.valueOf(jlBorrowerStudentIdConter.getText().trim()));
-                                        bookVo.setBorrowBookUserVo(userVo1);
-                                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                        Date returnDate = null;
-                                        try {
-                                            returnDate = simpleDateFormat.parse(jlReturnTimeConter.getText());
-                                        } catch (ParseException ex) {
-                                            throw new RuntimeException(ex);
-                                        }
-                                        bookVo.setReturnBookTime(returnDate);
-                                    }
-                                    defaultTableModel.setDataVector(dataV, titlesV);
-                                    try {
-                                        bookMessageController.updateBook(bookVo);
-                                    } catch (SQLException ex) {
-                                        throw new RuntimeException(ex);
-                                    }
-                                    setVisible(false);
-                                } else {
-                                    setVisible(false);
-                                }
-                            }
-                        }
-                    }
-
-                });
-            }
-
-        }
 
 
 
@@ -850,7 +452,7 @@ public class SystemAdministration extends JPanel {
      * 按某种方式对List<BookVo>排序
      */
     public List<BookVo> sortBookVos(List<BookVo> bookVos,int types) {
-
+      Vector<Vector> vector = new Vector<>();
         if (types == BOOK_PRICE_ASC) {
             bookVos.sort(new Comparator<BookVo>() {
                 @Override

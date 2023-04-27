@@ -7,7 +7,7 @@ import java.util.List;
 
 public class book_GetConnection {
    public int executeUpdate(String sql,Object...params) throws SQLException {
-       Connection connection = User_MysqlConnect.getConnection();
+       Connection connection = MysqlConnect.getConnection();
        PreparedStatement preparedStatement = connection.prepareStatement(sql);
       if(params !=null && params.length >0){
           for (int i = 1; i <= params.length; i++) {
@@ -16,6 +16,7 @@ public class book_GetConnection {
       }
        int rows = preparedStatement.executeUpdate();
       preparedStatement.close();
+      MysqlConnect.closeConnection();
 
        return rows;
    }
@@ -48,6 +49,7 @@ public class book_GetConnection {
            }
            list.add(t);
        }
+       MysqlConnect.closeConnection();
           return list;
    }
 }
